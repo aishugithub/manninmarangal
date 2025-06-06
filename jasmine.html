@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jasmine Plant - The Queen of Flowers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: #2e5b3c;
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-overlay {
+            background: rgba(46, 91, 60, 0.7);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .scientific-name {
+            font-style: italic;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        h2 {
+            color: #2e5b3c;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
+        
+        .fact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .fact-card {
+            background-color: #f1f8e9;
+            border-radius: 8px;
+            padding: 1.2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .fact-card h3 {
+            color: #2e5b3c;
+            margin-bottom: 0.7rem;
+            font-size: 1.2rem;
+        }
+        
+        ul {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .image-container {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        
+        .jasmine-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section {
+            margin-bottom: 2.5rem;
+        }
+        
+        footer {
+            background-color: #2e5b3c;
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+            
+            .fact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="header-overlay"></div>
+        <div class="header-content">
+            <h1>Jasmine Plant</h1>
+            <div class="scientific-name">Jasminum spp.</div>
+            <p>The Queen of Flowers</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Basic Information Section -->
+        <section class="section card">
+            <h2>Basic Information</h2>
+            <style>.jasmine-image {
+  max-width: 350px; 
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}</style>
+            <div class="image-container">
+                <img src="https://www.bhg.com/thmb/1tV6Jo0qHwI84UviIZVMKSue3YQ=/1280x0/filters:no_upscale():strip_icc()/static.onecms.io__wp-content__uploads__sites__37__2020__03__24__jasmine-4120cd7d-138704813a4a46028e36edbf6cf4d674.jpg" alt="Jasmine Plant" class="jasmine-image">
+            </div>
+            <div class="info-box" style="background:#e8f5e9; border:2px solid #2e5b3c; border-radius:12px; padding:1.2rem; margin-bottom:1.5rem; box-shadow:0 2px 8px rgba(46,91,60,0.07); font-size:1.08rem;">
+  <strong>Is the Jasmine plant native to India?</strong><br>
+  Some jasmine species, such as <em>Jasminum sambac</em> (Mogra) and <em>Jasminum auriculatum</em> (Jui), are native to the Indian subcontinent. However, the genus <em>Jasminum</em> includes species native to tropical and subtropical regions of Eurasia, Africa, and Oceania. Jasmine is deeply integrated into Indian culture, gardens, and traditions.
+</div>
+            <p>The jasmine plant (Jasminum spp.) is a genus of fragrant flowering vines and shrubs in the olive family Oleaceae. Native to tropical and subtropical regions of Eurasia, Africa, and Oceania, jasmine is widely cultivated for its iconic white, star-shaped flowers that release an intoxicating sweet fragrance, especially at night. With over 200 species, jasmine holds immense cultural, religious, and economic significance across many civilizations, particularly in South and Southeast Asia.</p>
+            
+            <div class="fact-grid" style="margin-top: 1.5rem;">
+                <div class="fact-card">
+                    <h3>Scientific Classification</h3>
+                    <ul>
+                        <li><strong>Kingdom:</strong> Plantae</li>
+                        <li><strong>Family:</strong> Oleaceae</li>
+                        <li><strong>Genus:</strong> Jasminum</li>
+                        <li><strong>Common Species:</strong> J. sambac, J. officinale, J. grandiflorum</li>
+                    </ul>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Names in Different Languages</h3>
+                    <ul>
+                        <li><strong>Tamil:</strong> மல்லிகை (Mallikai)</li>
+                        <li><strong>Hindi:</strong> चमेली (Chameli)</li>
+                        <li><strong>Sanskrit:</strong> मालती (Malati)</li>
+                        <li><strong>Malayalam:</strong> മല്ലി (Malli)</li>
+                        <li><strong>Telugu:</strong> మల్లెపువ్వు (Mallepuvvu)</li>
+                        <li><strong>Arabic:</strong> ياسمين (Yasmin)</li>
+                    </ul>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Physical Characteristics</h3>
+                    <ul>
+                        <li><strong>Growth Form:</strong> Shrubs or climbing vines</li>
+                        <li><strong>Leaves:</strong> Opposite, simple or compound</li>
+                        <li><strong>Flowers:</strong> White, star-shaped, intensely fragrant</li>
+                        <li><strong>Height:</strong> 1-10 meters depending on species</li>
+                        <li><strong>Blooming Season:</strong> Spring through fall (varies by species)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Religious & Cultural Significance Section -->
+        <section class="section card">
+            <h2>Religious & Cultural Significance</h2>
+            <p>Jasmine flowers hold profound religious and cultural significance across many civilizations, especially in Asia, where they're often considered sacred:</p>
+            
+            <div class="fact-grid" style="margin-top: 1.5rem;">
+                <div class="fact-card">
+                    <h3>Hinduism</h3>
+                    <p>In Hindu traditions, jasmine (especially Jasminum sambac) is revered as the "Flower of God." Devotees offer jasmine garlands to deities, particularly Lord Vishnu and Lord Shiva. The flower is associated with divine love, purity, and sensuality.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Buddhism</h3>
+                    <p>Buddhist temples often feature jasmine plants in their gardens. The flower symbolizes purity, divine hope, and spiritual enlightenment. In some Buddhist traditions, jasmine is used as an offering to Buddha.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Islam</h3>
+                    <p>In Islamic culture, jasmine represents divine love and beauty. It's believed that the fragrance of jasmine was one of the Prophet Muhammad's favorites. Many Islamic gardens feature jasmine plants as symbols of paradise.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>National Significance</h3>
+                    <p>Jasmine holds national importance in several countries: Jasminum sambac (Arabian Jasmine) is the national flower of the Philippines (Sampaguita) and Indonesia (Melati), while Jasminum officinale is Pakistan's national flower (Chambeli).</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Medicinal Uses Section -->
+        <section class="section card">
+            <h2>Medicinal Uses</h2>
+            <p>Beyond its enchanting fragrance, jasmine has been used in traditional medicine systems for centuries to treat various ailments:</p>
+            
+            <div class="fact-grid" style="margin-top: 1.5rem;">
+                <div class="fact-card">
+                    <h3>Jasmine Flowers</h3>
+                    <ul>
+                        <li>Used to treat anxiety, depression, and stress</li>
+                        <li>Help relieve insomnia and promote better sleep</li>
+                        <li>Applied to soothe skin irritations and inflammation</li>
+                        <li>Used in aromatherapy to elevate mood and reduce tension</li>
+                    </ul>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Jasmine Leaves</h3>
+                    <ul>
+                        <li>Have mild antiseptic properties</li>
+                        <li>Used to treat skin infections and wounds</li>
+                        <li>Help reduce fever in some traditional medicines</li>
+                        <li>Used to alleviate pain and inflammation</li>
+                    </ul>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Jasmine Oil</h3>
+                    <ul>
+                        <li>Known for its antidepressant and calming effects</li>
+                        <li>Used to reduce menstrual cramps and labor pains</li>
+                        <li>Applied to improve skin elasticity and reduce scarring</li>
+                        <li>Helps balance hormones, particularly in women</li>
+                    </ul>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Jasmine Tea</h3>
+                    <ul>
+                        <li>Contains antioxidants that combat free radicals</li>
+                        <li>Helps improve digestive health</li>
+                        <li>May help reduce cholesterol levels</li>
+                        <li>Supports weight management and metabolic health</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Commercial Uses Section -->
+        <section class="section card">
+            <h2>Commercial Uses</h2>
+            <p>Jasmine's enchanting fragrance and therapeutic properties have made it a valuable commercial commodity in several industries:</p>
+            
+            <div class="fact-grid" style="margin-top: 1.5rem;">
+                <div class="fact-card">
+                    <h3>Perfume Industry</h3>
+                    <p>Jasmine absolute is one of the most expensive and precious ingredients in perfumery. It takes approximately 8,000 handpicked jasmine flowers to produce just 1 gram of absolute. The scent is used as a base note in many iconic perfumes.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Tea Production</h3>
+                    <p>Jasmine tea, particularly from China, involves scenting tea leaves with fresh jasmine blossoms. Premium jasmine teas may undergo multiple scenting processes, with the flowers being replaced multiple times to achieve the desired aroma.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Cosmetics</h3>
+                    <p>Jasmine extracts feature prominently in skincare products for their soothing, anti-inflammatory, and moisturizing properties. The oil is valued for its ability to tone skin and reduce the appearance of scars.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Floral Industry</h3>
+                    <p>Jasmine flowers are a mainstay in the global floral industry, used in garlands, bouquets, and religious offerings. In countries like India, Thailand, and Indonesia, jasmine flower threading provides livelihood to thousands of people.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Traditional Uses in India Section -->
+        <section class="section card">
+            <h2>Traditional Uses in India</h2>
+            <p>In India, jasmine (especially Mallikai in Tamil culture) holds a special place and is integrated into daily life, traditions, and ceremonies:</p>
+            
+            <div class="fact-grid" style="margin-top: 1.5rem;">
+                <div class="fact-card">
+                    <h3>Women's Adornment</h3>
+                    <p>South Indian women traditionally wear jasmine flowers in their hair (Gajra), not just for beauty but also for the cooling effect on the head and the calming fragrance that helps reduce stress.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Wedding Ceremonies</h3>
+                    <p>Jasmine garlands are exchanged between bride and groom in many South Indian wedding ceremonies, symbolizing purity, love, and auspiciousness. The wedding bed is often decorated with jasmine flowers.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Religious Rituals</h3>
+                    <p>Jasmine garlands are offered to deities during daily worship in temples and homes. The flower is particularly associated with goddess Lakshmi and is offered during Diwali celebrations.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Ayurvedic Medicine</h3>
+                    <p>In Ayurveda, jasmine is used to balance the Pitta dosha. It's prescribed for skin disorders, eye ailments, and mental health issues. Jasmine oil massage is recommended for stress relief and promoting restful sleep.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Interesting Facts Section -->
+        <section class="section card">
+            <h2>Interesting Facts</h2>
+            
+            <div class="fact-grid">
+                <div class="fact-card">
+                    <h3>Night-Blooming Magic</h3>
+                    <p>Many jasmine species release their strongest fragrance at night to attract nocturnal pollinators like moths. This is why the scent of jasmine is often associated with moonlight and evening romance.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Jasmine in Space</h3>
+                    <p>In 2003, China sent jasmine seeds to space aboard the Shenzhou 5 spacecraft to study the effects of space conditions on plant genetics. These "space jasmines" later showed enhanced growth and flowering capabilities.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Not All Jasmine Smells Sweet</h3>
+                    <p>While most jasmine species are known for their sweet fragrance, some varieties like Jasminum leratii from New Caledonia have a distinctly foul odor, evolved to attract different types of pollinators.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Royal Connection</h3>
+                    <p>Jasmine has been associated with royalty across cultures. Cleopatra reportedly filled her palace with jasmine to seduce Mark Antony, while Persian emperors revered the plant as a symbol of divine love and paradise.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Jasmine Language</h3>
+                    <p>In the Victorian language of flowers (floriography), jasmine represented amiability, modesty, grace, and elegance. White jasmine specifically symbolized sweet love and affection.</p>
+                </div>
+                
+                <div class="fact-card">
+                    <h3>Not True Jasmine</h3>
+                    <p>Several fragrant plants are called "jasmine" despite not belonging to the Jasminum genus. Examples include star jasmine (Trachelospermum), Confederate jasmine (Trachelospermum jasminoides), and night-blooming jasmine (Cestrum nocturnum).</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <p>© 2025 - All About Jasmine Plant</p>
+        <p>Learn more about fragrant flowering plants</p>
+        <p>A project by Chinmaya Computing Club</p>
+    </footer>
+</body>
+</html>

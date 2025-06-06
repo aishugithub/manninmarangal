@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Know Our Trees</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <style> 
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; background: #f8ffe5;}
+    canvas, video { max-width: 100%; border-radius: 12px; }
+    #result { margin-top: 20px; font-size: 1.2em; }
+    button { margin-top: 10px; padding: 10px 20px; font-size: 1em; cursor: pointer; border-radius: 8px; border: none; background: #6dd47e; color: #fff;}
+    button:active { background: #76b947; }
+    #webcam-container { display: inline-block; border-radius: 15px; overflow: hidden; box-shadow: 0 0 20px #c7ffd8; }
+    .contribution-message {
+      background: linear-gradient(135deg, #fffbe7 0%, #e0ffe7 100%);
+      border: 2px solid #6dd47e;
+      border-radius: 14px;
+      padding: 1.2em 1em;
+      margin: 1.5em auto;
+      max-width: 500px;
+      color: #2e5b3c;
+      box-shadow: 0 2px 12px rgba(109, 212, 126, 0.08);
+      font-size: 1.1em;
+      text-align: left;
+    }
+    .contribution-message h3 {
+      color: #388e3c;
+      margin-bottom: 0.5em;
+      font-size: 1.2em;
+      text-align: center;
+    }
+    .contribution-message ul {
+      margin: 0.5em 0 0 1.2em;
+      padding: 0;
+    }
+    .contribution-message li {
+      margin-bottom: 0.5em;
+    }
+    .contribution-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      margin-top: 1em;
+    }
+    .contribution-btn {
+      background: #388e3c;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.7em 1.4em;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .contribution-btn:hover {
+      background: #2e5b3c;
+    }
+    #video {
+      width: 100%;
+      max-width: 350px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    @media (max-width: 600px) {
+      .contribution-message {
+        font-size: 1em;
+        padding: 1em 0.5em;
+        max-width: 98vw;
+      }
+      #result { font-size: 1em; }
+      #video {
+        max-width: 98vw;
+        height: auto;
+      }
+      footer {
+        font-size: 0.98em;
+        padding: 1em 0.3em 0.7em 0.3em;
+        border-radius: 10px 10px 0 0;
+      }
+      footer div {
+        word-break: break-word;
+      }
+    }
+    .main-tamil-title {
+      font-family: 'Noto Sans Tamil', Arial, sans-serif;
+      font-size: 2.7em;
+      font-weight: bold;
+      color: #111; /* Black text */
+      text-shadow:
+        0 2px 8px #6dd47e,   /* Green glow */
+        0 1px 0 #fff,        /* Subtle white highlight */
+        0 0px 10px #228B22;  /* Deep green outer glow */
+      letter-spacing: 0.04em;
+      margin-bottom: 0.3em;
+      /* Remove gradient background for solid black text */
+      background: none;
+      -webkit-background-clip: initial;
+      -webkit-text-fill-color: initial;
+      background-clip: initial;
+    }
+    footer {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="main-tamil-title">மண்ணின் மரங்கள்</h1>
+  <p style="font-size:1.1em; color:#388e3c; margin-bottom:1.2em;">
+    Discover fascinating facts about our trees — simply show a leaf to your camera and let our system identify it for you!
+  </p>
+  <h2 style="display: flex; align-items: center; justify-content: center; gap: 0.7em;">
+    A project by <br>
+        Chinmaya Computing Club
+        <img src="logo.png" alt="Chinmaya Computing Club Logo" style="height: 38px; vertical-align: middle; border-radius: 8px; box-shadow:0 3px 8px #b2f2c9;">
+  </h2>
+  <div id="webcam-container">
+    <video id="video" width="350" height="262" autoplay playsinline></video>
+  </div>
+  <br />
+  <div id="cameraButtons">
+    <button id="frontCameraBtn" style="display:none;">Open Front Camera</button>
+    <button id="rearCameraBtn" style="display:none;">Open Rear Camera</button>
+  </div>
+  <button id="predictBtn" style="display:none;">Identify Tree</button>
+  <p id="result"></p>
+
+  <script>
+    const MODEL_URL = "./model/";
+    let model, maxPredictions;
+    let video = document.getElementById('video');
+    let streamStarted = false;
+
+    // List cameras and show appropriate buttons
+    async function setupCameraButtons() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoInputs = devices.filter(device => device.kind === 'videoinput');
+      if (videoInputs.length === 1) {
+        // Only one camera, show a single button
+        document.getElementById('rearCameraBtn').innerText = "Open Camera";
+        document.getElementById('rearCameraBtn').style.display = '';
+      } else {
+        // Try to show both buttons
+        document.getElementById('frontCameraBtn').style.display = '';
+        document.getElementById('rearCameraBtn').style.display = '';
+      }
+    }
+
+    // Open camera by facing mode
+    async function openCamera(facingMode) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: facingMode },
+            width: { ideal: 350 },
+            height: { ideal: 262 }
+          }
+        });
+        video.srcObject = stream;
+        await video.play();
+        streamStarted = true;
+        document.getElementById('predictBtn').style.display = '';
+        document.getElementById('cameraButtons').style.display = 'none';
+        await loadModel();
+      } catch (e) {
+        alert("Could not access the camera: " + e);
+      }
+    }
+
+    // Load the Teachable Machine model
+    async function loadModel() {
+      if (!model) {
+        const modelURL = MODEL_URL + "model.json";
+        const metadataURL = MODEL_URL + "metadata.json";
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+      }
+    }
+
+    // Prediction logic
+    async function captureAndPredict() {
+      if (!model || !streamStarted) {
+        document.getElementById("result").innerText =
+          "Model or camera not ready.";
+        return;
+      }
+      const prediction = await model.predict(video);
+      prediction.sort((a, b) => b.probability - a.probability);
+      const topResult = prediction[0];
+      const confidence = topResult.probability;
+
+      if (confidence > 0.8) {
+        document.getElementById("result").innerText =
+          `Prediction: ${topResult.className} (${(confidence * 100).toFixed(2)}%)`;
+        setTimeout(() => window.location.href = `${topResult.className.toLowerCase()}.html`, 2000);
+      } else if (confidence >= 0.7 && confidence <= 0.8) {
+        document.getElementById("result").innerHTML = `
+          <div class="contribution-message">
+            <h3>We're almost sure!</h3>
+            <p>
+              The system thinks this might be <b>${topResult.className}</b> (<b>${(confidence * 100).toFixed(2)}%</b> confidence).
+            </p>
+            <div class="contribution-actions">
+              <button class="contribution-btn" id="showPredictionBtn">Show Prediction</button>
+              <button class="contribution-btn" id="contributeBtn">Contribute</button>
+            </div>
+          </div>
+        `;
+        document.getElementById('showPredictionBtn').onclick = function() {
+          document.getElementById("result").innerHTML = `
+            <div class="contribution-message">
+              <h3>Prediction</h3>
+              <p>
+                This leaf is most likely <b>${topResult.className}</b> (<b>${(confidence * 100).toFixed(2)}%</b> confidence).
+              </p>
+            </div> 
+          `;
+        };
+        document.getElementById('contributeBtn').onclick = function() {
+          document.getElementById("result").innerHTML = `
+            <div class="contribution-message">
+              <h3>Help Us Expand Our Project!</h3>
+              <p>
+                If you know the name of this tree, please contribute by sending us at least <b>50 different photos</b> of the leaf and the tree.<br>
+                You can also share interesting facts about the tree if you know any.
+              </p>
+              <ul>
+                <li>Send your images and details via WhatsApp: <b>+91 99625 82224</b></li>
+                <li>Or email us at: <b>aishwarya.chinmaya@gmail.com</b></li>
+                <li>Please mention the name of the tree and any interesting facts you know.</li>
+              </ul>
+              <p style="margin-top:1em;">Your contribution will help us make this project better for everyone!</p>
+            </div>
+          `;
+        };
+      } else {
+        document.getElementById("result").innerHTML = `
+          <div class="contribution-message">
+            <h3>We couldn't confidently identify this leaf.</h3>
+            <p>
+              <b>Help us expand our project!</b><br>
+              If you know the name of this tree, please contribute by sending us at least <b>50 different photos</b> of the leaf and the tree.<br>
+              You can also share interesting facts about the tree if you know any.
+            </p>
+            <ul>
+              <li>Send your images and details via WhatsApp: <b>+91 99625 82224</b></li>
+              <li>Or email us at: <b>aishwarya.chinmaya@gmail.com</b></li>
+              <li>Please mention the name of the tree and any interesting facts you know.</li>
+            </ul>
+            <p style="margin-top:1em;">Your contribution will help us make this project better for everyone!</p>
+          </div>
+        `;
+      }
+    }
+
+    document.getElementById('frontCameraBtn').onclick = () => openCamera("user");
+    document.getElementById('rearCameraBtn').onclick = () => openCamera("environment");
+    document.getElementById('predictBtn').onclick = captureAndPredict;
+
+    // On load, setup camera buttons
+    window.onload = setupCameraButtons;
+  </script>
+
+  <footer style="margin-top:2.5em; padding:1.2em 0 0.7em 0; background: #e6f2e6; border-top: 2px solid #6dd47e; border-radius: 16px 16px 0 0; box-shadow: 0 -2px 12px #b2f2c9;">
+    <div style="font-size:1.08em; color:#228B22; font-weight:500;">
+      <span>Mentor: <b>Smt. Aishwarya S</b></span><br>
+      <span>Team: 
+        <b>Yashaswini</b> (Team Leader), 
+        <b>Tharish</b> (Assistant Team Leader), 
+        <b>Haritha</b>, 
+        <b>Vishvesh</b>
+      </span>
+    </div>
+    <div style="margin-top:0.7em; font-size:0.98em; color:#388e3c;">
+      &copy; 2025 Chinmaya Computing Club. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>

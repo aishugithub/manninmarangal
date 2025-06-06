@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <button onclick="openCamera()">Open Rear Camera</button>
+    <video id="video" width="300" height="225" autoplay></video>
+    <script>
+      function openCamera() {
+        navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } }
+        }).then(stream => {
+          document.getElementById('video').srcObject = stream;
+        }).catch(e => alert(e));
+      }
+    </script>
+  </body>
+</html> 
