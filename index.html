@@ -1,68 +1,871 @@
-<!-- HTML file with image upload functionality added -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Head contents unchanged -->
-  <!-- Your existing head section remains the same -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mannin Marangal - Plant Scanner</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --primary-green: #6dd47e;
+      --dark-green: #388e3c;
+      --deep-green: #2e5b3c;
+      --light-green: #e6f2e6;
+      --accent-green: #228B22;
+      --bg-color: #f8ffe5;
+      --text-dark: #2e5b3c;
+      --text-light: #388e3c;
+      --white: #ffffff;
+      --shadow: rgba(109, 212, 126, 0.15);
+      --border-radius: 16px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-dark);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 2rem 0;
+      background: linear-gradient(135deg, var(--bg-color) 0%, var(--light-green) 100%);
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+      box-shadow: 0 4px 20px var(--shadow);
+      margin-bottom: 2rem;
+    }
+
+    .main-tamil-title {
+      font-family: 'Noto Sans Tamil', Arial, sans-serif;
+      font-size: clamp(2rem, 8vw, 3rem);
+      font-weight: 700;
+      color: var(--text-dark);
+      text-shadow: 0 2px 8px var(--primary-green);
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.04em;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 4vw, 1.2rem);
+      color: var(--text-light);
+      margin-bottom: 1rem;
+      font-weight: 400;
+    }
+
+    .team-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      font-size: clamp(0.9rem, 3vw, 1.1rem);
+      color: var(--text-light);
+    }
+
+    .team-logo {
+      height: 40px;
+      border-radius: 8px;
+      box-shadow: 0 3px 8px var(--shadow);
+    }
+
+    /* Navigation */
+    .nav-links {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .nav-btn {
+      background: var(--white);
+      border: 2px solid var(--primary-green);
+      color: var(--dark-green);
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    .nav-btn:hover {
+      background: var(--primary-green);
+      color: var(--white);
+      transform: translateY(-2px);
+    }
+
+    /* Main Content */
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Camera Section */
+    .camera-section {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      box-shadow: 0 8px 32px var(--shadow);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .camera-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-green) 0%, var(--dark-green) 100%);
+    }
+
+    #webcam-container {
+      position: relative;
+      display: inline-block;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: 0 8px 24px var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    #video {
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      display: block;
+    }
+
+    .camera-status {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: var(--white);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .scanning-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(109, 212, 126, 0.9);
+      color: var(--white);
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      animation: pulse 2s infinite;
+      display: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+    }
+
+    /* Recognition Results */
+    .recognition-result {
+      background: linear-gradient(135deg, var(--light-green) 0%, var(--white) 100%);
+      border: 2px solid var(--primary-green);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin-top: 1rem;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: var(--transition);
+      display: none;
+    }
+
+    .recognition-result.show {
+      display: block;
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .plant-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .plant-name {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--dark-green);
+      margin-bottom: 0.3rem;
+    }
+
+    .confidence-score {
+      font-size: 1rem;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+    }
+
+    .confidence-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .confidence-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-green) 0%, var(--dark-green) 100%);
+      transition: width 0.5s ease;
+    }
+
+    .learn-btn {
+      background: var(--dark-green);
+      color: var(--white);
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(56, 142, 60, 0.3);
+    }
+
+    .learn-btn:hover {
+      background: var(--deep-green);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(56, 142, 60, 0.4);
+    }
+
+    .learn-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Floating Scan Button */
+    .floating-scan-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: var(--primary-green);
+      border: none;
+      border-radius: 50%;
+      color: var(--white);
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px var(--shadow);
+      transition: var(--transition);
+      z-index: 1000;
+      display: none;
+    }
+
+    .floating-scan-btn:hover {
+      background: var(--dark-green);
+      transform: scale(1.1);
+    }
+
+    .floating-scan-btn.show {
+      display: block;
+      animation: slideInUp 0.5s ease;
+    }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Loading States */
+    .loading-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary-green);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Camera Controls */
+    .camera-controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .camera-btn {
+      background: var(--white);
+      border: 2px solid var(--primary-green);
+      color: var(--dark-green);
+      padding: 0.6rem 1.2rem;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      min-width: 120px;
+    }
+
+    .camera-btn:hover {
+      background: var(--primary-green);
+      color: var(--white);
+    }
+
+    .camera-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Plant Details Modal */
+    .plant-details-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .plant-details-modal.show {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      width: 100%;
+      max-width: 900px;
+      max-height: 90vh;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      background: var(--primary-green);
+      color: var(--white);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--white);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: var(--transition);
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-body {
+      height: calc(90vh - 80px);
+      overflow: auto;
+    }
+
+    .modal-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 0.5rem;
+      }
+
+      .header {
+        padding: 1.5rem 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .camera-section {
+        padding: 1.5rem;
+      }
+
+      .main-content {
+        gap: 1rem;
+      }
+
+      .nav-links {
+        position: static;
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .floating-scan-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 55px;
+        height: 55px;
+        font-size: 1.3rem;
+      }
+
+      .plant-details-modal {
+        padding: 0.5rem;
+      }
+
+      .modal-content {
+        max-height: 95vh;
+      }
+
+      .modal-body {
+        height: calc(95vh - 80px);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .camera-controls {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .camera-btn {
+        width: 100%;
+        max-width: 200px;
+      }
+
+      .learn-btn {
+        width: 100%;
+        max-width: 250px;
+      }
+    }
+
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      :root {
+        --primary-green: #228B22;
+        --dark-green: #006400;
+        --shadow: rgba(0, 0, 0, 0.3);
+      }
+    }
+  </style>
 </head>
 <body>
-  <!-- Existing content remains unchanged -->
+  <div class="nav-links">
+    <a href="team.html" class="nav-btn">👥 Meet the Team</a>
+  </div>
 
-  <!-- Upload Image Section -->
-  <div class="container" style="margin-top: 2rem;">
-    <section class="camera-section">
-      <h2 style="margin-bottom: 1rem; color: var(--dark-green);">🌿 Upload a Leaf Photo</h2>
-      <input type="file" id="uploadInput" accept="image/*" style="margin-bottom: 1rem;">
-      <br>
-      <canvas id="uploadCanvas" style="display:none;"></canvas>
-      <button class="learn-btn" onclick="handleImageUpload()">🔍 Predict from Uploaded Image</button>
-    </section>
+  <div class="container">
+    <header class="header">
+      <h1 class="main-tamil-title">மண்ணின் மரங்கள்</h1>
+      <p class="subtitle">
+        Discover fascinating facts about our trees — simply show a leaf to your camera and let our AI identify it for you!
+      </p>
+      <div class="team-info">
+        <span>A project by Chinmaya Computing Club</span>
+        <img src="logo.png" alt="Chinmaya Computing Club Logo" class="team-logo">
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="camera-section">
+        <div class="loading-spinner" id="loadingSpinner"></div>
+        
+        <div class="camera-controls" id="cameraControls">
+          <button class="camera-btn" id="frontCameraBtn" style="display:none;">📱 Front Camera</button>
+          <button class="camera-btn" id="rearCameraBtn" style="display:none;">📸 Rear Camera</button>
+        </div>
+
+        <div id="webcam-container">
+          <video id="video" autoplay playsinline></video>
+          <div class="camera-status" id="cameraStatus">🔴 Camera Off</div>
+          <div class="scanning-indicator" id="scanningIndicator">🔍 Scanning...</div>
+        </div>
+
+        <div class="recognition-result" id="recognitionResult">
+          <span class="plant-icon">🌿</span>
+          <div class="plant-name" id="plantName">Plant Name</div>
+          <div class="confidence-score" id="confidenceScore">Confidence: 0%</div>
+          <div class="confidence-bar">
+            <div class="confidence-fill" id="confidenceFill"></div>
+          </div>
+          <button class="learn-btn" id="learnBtn">🌱 Discover More</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <button class="floating-scan-btn" id="floatingScanBtn" title="Scan Another Leaf">
+    🔍
+  </button>
+
+  <!-- Plant Details Modal -->
+  <div class="plant-details-modal" id="plantDetailsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Plant Details</h2>
+        <button class="close-btn" id="closeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <iframe class="modal-iframe" id="modalIframe" src=""></iframe>
+      </div>
+    </div>
   </div>
 
   <script>
-    async function handleImageUpload() {
-      const fileInput = document.getElementById('uploadInput');
-      if (!fileInput.files || fileInput.files.length === 0) {
-        alert("Please choose an image file.");
-        return;
-      }
-      const file = fileInput.files[0];
-      const reader = new FileReader();
-      reader.onload = async function (e) {
-        const img = new Image();
-        img.onload = async function () {
-          const canvas = document.getElementById('uploadCanvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = inputShape[0];
-          canvas.height = inputShape[1];
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    // ==== CONFIGURATION ====
+    const MODEL_URL = "./model/model.json";
+    const CONFIDENCE_THRESHOLD = 0.7;
+    const SCAN_INTERVAL = 2000; // 2 seconds between scans
+    
+    const classLabels = [
+      "almond", "aloe_vera", "arali", "banana", "basil", "coconut", "dumb_cane",
+      "fiji_fan_palm", "geranium_aralia", "gulmohar", "hibiscus", "jasmine",
+      "jungle_geranium", "kenya_hyacinth", "mango", "neem", "papaya", "peepal",
+      "song_of_india", "star_gooseberry", "tamarind", "teak", "yellowflame"
+    ];
 
-          const imgTensor = tf.browser.fromPixels(canvas)
-            .toFloat()
-            .div(255.0)
-            .expandDims(0);
+    // Plant emojis for better UX
+    const plantEmojis = {
+      almond: "🌰", aloe_vera: "🌿", arali: "🌺", banana: "🍌", basil: "🌿",
+      coconut: "🥥", dumb_cane: "🌱", fiji_fan_palm: "🌴", geranium_aralia: "🌿",
+      gulmohar: "🌸", hibiscus: "🌺", jasmine: "🌼", jungle_geranium: "🌿",
+      kenya_hyacinth: "🌷", mango: "🥭", neem: "🌳", papaya: "🍈", peepal: "🌳",
+      song_of_india: "🌿", star_gooseberry: "⭐", tamarind: "🌿", teak: "🌳",
+      yellowflame: "🌻"
+    };
 
-          const prediction = await model.predict(imgTensor).data();
-          imgTensor.dispose();
+    // Global variables
+    let model;
+    let video = document.getElementById('video');
+    let streamStarted = false;
+    let scanning = false;
+    let scanInterval;
+    let inputShape = [224, 224];
+    let lastPrediction = null;
 
-          let maxIdx = 0;
-          for (let i = 1; i < prediction.length; i++) {
-            if (prediction[i] > prediction[maxIdx]) maxIdx = i;
-          }
+    // DOM elements
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const cameraStatus = document.getElementById('cameraStatus');
+    const scanningIndicator = document.getElementById('scanningIndicator');
+    const recognitionResult = document.getElementById('recognitionResult');
+    const plantName = document.getElementById('plantName');
+    const confidenceScore = document.getElementById('confidenceScore');
+    const confidenceFill = document.getElementById('confidenceFill');
+    const learnBtn = document.getElementById('learnBtn');
+    const floatingScanBtn = document.getElementById('floatingScanBtn');
+    const plantDetailsModal = document.getElementById('plantDetailsModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalIframe = document.getElementById('modalIframe');
+    const closeModal = document.getElementById('closeModal');
 
-          const className = classLabels[maxIdx] || "Unknown";
-          const confidence = prediction[maxIdx];
-
-          if (confidence > CONFIDENCE_THRESHOLD) {
-            displayRecognitionResult(className, confidence);
-          } else {
-            alert("Prediction confidence too low. Try another image.");
-          }
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
+    // Initialize app
+    async function initApp() {
+      showLoading(true);
+      await setupCameraButtons();
+      await loadModel();
+      await autoStartCamera();
+      showLoading(false);
     }
+
+    // Show/hide loading
+    function showLoading(show) {
+      loadingSpinner.style.display = show ? 'block' : 'none';
+    }
+
+    // Setup camera buttons
+    async function setupCameraButtons() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoInputs = devices.filter(device => device.kind === 'videoinput');
+        
+        if (videoInputs.length === 1) {
+          document.getElementById('rearCameraBtn').innerText = "📸 Start Camera";
+          document.getElementById('rearCameraBtn').style.display = 'block';
+        } else if (videoInputs.length > 1) {
+          document.getElementById('frontCameraBtn').style.display = 'block';
+          document.getElementById('rearCameraBtn').style.display = 'block';
+        }
+      } catch (e) {
+        console.error('Error enumerating devices:', e);
+      }
+    }
+
+    // Auto start camera
+    async function autoStartCamera() {
+      try {
+        await openCamera('environment'); // Start with rear camera
+      } catch (e) {
+        console.log('Rear camera not available, trying front camera');
+        try {
+          await openCamera('user');
+        } catch (e2) {
+          console.error('No cameras available:', e2);
+          updateCameraStatus('❌ No Camera Available');
+        }
+      }
+    }
+
+    // Open camera
+    async function openCamera(facingMode) {
+      try {
+        if (video.srcObject) {
+          video.srcObject.getTracks().forEach(track => track.stop());
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: facingMode },
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          }
+        });
+
+        video.srcObject = stream;
+        await video.play();
+        streamStarted = true;
+        updateCameraStatus('🟢 Camera Active');
+        document.getElementById('cameraControls').style.display = 'none';
+        startScanning();
+      } catch (e) {
+        console.error('Camera error:', e);
+        updateCameraStatus('❌ Camera Error');
+        throw e;
+      }
+    }
+
+    // Update camera status
+    function updateCameraStatus(status) {
+      cameraStatus.textContent = status;
+    }
+
+    // Load model
+    async function loadModel() {
+      try {
+        if (!model) {
+          model = await tf.loadLayersModel(MODEL_URL);
+          console.log('Model loaded successfully');
+        }
+      } catch (e) {
+        console.error('Error loading model:', e);
+        alert('Error loading AI model. Please refresh the page.');
+      }
+    }
+
+    // Start continuous scanning
+    function startScanning() {
+      if (scanning) return;
+      scanning = true;
+      scanningIndicator.style.display = 'block';
+      
+      scanInterval = setInterval(async () => {
+        if (model && streamStarted) {
+          await performPrediction();
+        }
+      }, SCAN_INTERVAL);
+    }
+
+    // Stop scanning
+    function stopScanning() {
+      scanning = false;
+      scanningIndicator.style.display = 'none';
+      if (scanInterval) {
+        clearInterval(scanInterval);
+        scanInterval = null;
+      }
+    }
+
+    // Perform prediction
+    async function performPrediction() {
+      try {
+        const input = captureFrameAndPreprocess();
+        const prediction = await model.predict(input).data();
+        input.dispose();
+
+        // Find top prediction
+        let maxIdx = 0;
+        for (let i = 1; i < prediction.length; i++) {
+          if (prediction[i] > prediction[maxIdx]) maxIdx = i;
+        }
+
+        const className = classLabels[maxIdx] || "Unknown";
+        const confidence = prediction[maxIdx];
+
+        // Only show results above threshold
+        if (confidence > CONFIDENCE_THRESHOLD) {
+          displayRecognitionResult(className, confidence);
+          lastPrediction = { className, confidence };
+        }
+      } catch (e) {
+        console.error('Prediction error:', e);
+      }
+    }
+
+    // Capture frame and preprocess
+    function captureFrameAndPreprocess() {
+      const canvas = document.createElement('canvas');
+      canvas.width = inputShape[0];
+      canvas.height = inputShape[1];
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let imgTensor = tf.browser.fromPixels(imageData)
+        .toFloat()
+        .div(255.0)
+        .expandDims(0);
+
+      return imgTensor;
+    }
+
+    // Display recognition result
+    function displayRecognitionResult(className, confidence) {
+      const emoji = plantEmojis[className] || '🌿';
+      const formattedName = className.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const confidencePercent = Math.round(confidence * 100);
+
+      document.querySelector('.plant-icon').textContent = emoji;
+      plantName.textContent = formattedName;
+      confidenceScore.textContent = `Confidence: ${confidencePercent}%`;
+      confidenceFill.style.width = `${confidencePercent}%`;
+      
+      learnBtn.onclick = () => showPlantDetails(className, formattedName);
+      
+      recognitionResult.classList.add('show');
+      floatingScanBtn.classList.add('show');
+      
+      // Stop scanning when result is shown
+      stopScanning();
+    }
+
+    // Show plant details
+    function showPlantDetails(className, formattedName) {
+      const detailsUrl = `${className}.html`;
+      modalTitle.textContent = `${plantEmojis[className] || '🌿'} ${formattedName}`;
+      modalIframe.src = detailsUrl;
+      plantDetailsModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Close modal
+    function closeDetailsModal() {
+      plantDetailsModal.classList.remove('show');
+      modalIframe.src = '';
+      document.body.style.overflow = 'auto';
+    }
+
+    // Reset scanner
+    function resetScanner() {
+      recognitionResult.classList.remove('show');
+      floatingScanBtn.classList.remove('show');
+      lastPrediction = null;
+      startScanning();
+    }
+
+    // Event listeners
+    document.getElementById('frontCameraBtn').onclick = () => openCamera("user");
+    document.getElementById('rearCameraBtn').onclick = () => openCamera("environment");
+    closeModal.onclick = closeDetailsModal;
+    floatingScanBtn.onclick = resetScanner;
+
+    // Close modal on backdrop click
+    plantDetailsModal.onclick = (e) => {
+      if (e.target === plantDetailsModal) {
+        closeDetailsModal();
+      }
+    };
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeDetailsModal();
+      }
+      if (e.key === ' ' || e.key === 'Enter') {
+        if (floatingScanBtn.classList.contains('show')) {
+          resetScanner();
+        }
+      }
+    });
+
+    // Initialize app when page loads
+    window.addEventListener('load', initApp);
+
+    // Handle page visibility changes
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopScanning();
+      } else if (streamStarted && !recognitionResult.classList.contains('show')) {
+        startScanning();
+      }
+    });
   </script>
 </body>
 </html>
