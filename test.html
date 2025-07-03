@@ -25,20 +25,30 @@
     const CONFIDENCE_THRESHOLD = 0.7;
 
     const classLabels = [
-      "almond", "aloe_vera", "arali", "banana", "basil", "coconut", "dumb_cane",
-      "fiji_fan_palm", "geranium_aralia", "gulmohar", "hibiscus", "jasmine",
-      "jungle_geranium", "kenya_hyacinth", "mango", "neem", "papaya", "peepal",
-      "song_of_india", "star_gooseberry", "tamarind", "teak", "yellowflame"
-    ];
+  'almond', 'arali', 'banana', 'dumb_cane', 'fiji_fan_palm', 'firecracker',
+  'geranium_aralia', 'hawaiian_ti', 'hibiscus', 'jasmine', 'jungle_geranium',
+  'kenya_hyacinth', 'neem', 'papaya', 'peepal', 'song_of_india'
+];
 
-    const plantEmojis = {
-      almond: "🌰", aloe_vera: "🌿", arali: "🌺", banana: "🍌", basil: "🌿",
-      coconut: "🥥", dumb_cane: "🌱", fiji_fan_palm: "🌴", geranium_aralia: "🌿",
-      gulmohar: "🌸", hibiscus: "🌺", jasmine: "🌼", jungle_geranium: "🌿",
-      kenya_hyacinth: "🌷", mango: "🥭", neem: "🌳", papaya: "🍈", peepal: "🌳",
-      song_of_india: "🌿", star_gooseberry: "⭐", tamarind: "🌿", teak: "🌳",
-      yellowflame: "🌻"
-    };
+const plantEmojis = {
+  almond: "🌰",
+  arali: "🌺",
+  banana: "🍌",
+  dumb_cane: "🌱",
+  fiji_fan_palm: "🌴",
+  firecracker: "🎆",
+  geranium_aralia: "🌿",
+  hawaiian_ti: "🍃",
+  hibiscus: "🌺",
+  jasmine: "🌼",
+  jungle_geranium: "🌿",
+  kenya_hyacinth: "🌷",
+  neem: "🌳",
+  papaya: "🍈",
+  peepal: "🌳",
+  song_of_india: "🌿"
+};
+
 
     let model;
 
