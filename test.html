@@ -1,0 +1,71 @@
+<!-- HTML file with image upload functionality added -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Head contents unchanged -->
+  <!-- Your existing head section remains the same -->
+</head>
+<body>
+  <!-- Existing content remains unchanged -->
+
+  <!-- Upload Image Section -->
+  <div class="container" style="margin-top: 2rem;">
+    <section class="camera-section">
+      <h2 style="margin-bottom: 1rem; color: var(--dark-green);">🌿 Upload a Leaf Photo</h2>
+      <input type="file" id="uploadInput" accept="image/*" style="margin-bottom: 1rem;">
+      <br>
+      <canvas id="uploadCanvas" style="display:none;"></canvas>
+      <button class="learn-btn" onclick="handleImageUpload()">🔍 Predict from Uploaded Image</button>
+    </section>
+  </div>
+
+  <script>
+    // Add global reference to input shape if not defined already
+    const inputShape = [224, 224];
+
+    async function handleImageUpload() {
+      const fileInput = document.getElementById('uploadInput');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert("Please choose an image file.");
+        return;
+      }
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        const img = new Image();
+        img.onload = async function () {
+          const canvas = document.getElementById('uploadCanvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = inputShape[0];
+          canvas.height = inputShape[1];
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          const imgTensor = tf.browser.fromPixels(canvas)
+            .toFloat()
+            .div(255.0)
+            .expandDims(0);
+
+          const prediction = await model.predict(imgTensor).data();
+          imgTensor.dispose();
+
+          let maxIdx = 0;
+          for (let i = 1; i < prediction.length; i++) {
+            if (prediction[i] > prediction[maxIdx]) maxIdx = i;
+          }
+
+          const className = classLabels[maxIdx] || "Unknown";
+          const confidence = prediction[maxIdx];
+
+          if (confidence > CONFIDENCE_THRESHOLD) {
+            displayRecognitionResult(className, confidence);
+          } else {
+            alert("Prediction confidence too low. Try another image.");
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
