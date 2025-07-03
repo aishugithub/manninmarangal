@@ -1,9 +1,12 @@
-<!-- HTML file with image upload functionality added -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Head contents unchanged -->
-  <!-- Your existing head section remains the same -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mannin Marangal - Plant Scanner</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
   <!-- Existing content remains unchanged -->
@@ -11,7 +14,7 @@
   <!-- Upload Image Section -->
   <div class="container" style="margin-top: 2rem;">
     <section class="camera-section">
-      <h2 style="margin-bottom: 1rem; color: var(--dark-green);">🌿 Upload a Leaf Photo</h2>
+      <h2 style="margin-bottom: 1rem; color: #2e5b3c;">🌿 Upload a Leaf Photo</h2>
       <input type="file" id="uploadInput" accept="image/*" style="margin-bottom: 1rem;">
       <br>
       <canvas id="uploadCanvas" style="display:none;"></canvas>
@@ -20,8 +23,26 @@
   </div>
 
   <script>
-    // Add global reference to input shape if not defined already
     const inputShape = [224, 224];
+    const CONFIDENCE_THRESHOLD = 0.7;
+
+    const classLabels = [
+      "almond", "aloe_vera", "arali", "banana", "basil", "coconut", "dumb_cane",
+      "fiji_fan_palm", "geranium_aralia", "gulmohar", "hibiscus", "jasmine",
+      "jungle_geranium", "kenya_hyacinth", "mango", "neem", "papaya", "peepal",
+      "song_of_india", "star_gooseberry", "tamarind", "teak", "yellowflame"
+    ];
+
+    const plantEmojis = {
+      almond: "🌰", aloe_vera: "🌿", arali: "🌺", banana: "🍌", basil: "🌿",
+      coconut: "🥥", dumb_cane: "🌱", fiji_fan_palm: "🌴", geranium_aralia: "🌿",
+      gulmohar: "🌸", hibiscus: "🌺", jasmine: "🌼", jungle_geranium: "🌿",
+      kenya_hyacinth: "🌷", mango: "🥭", neem: "🌳", papaya: "🍈", peepal: "🌳",
+      song_of_india: "🌿", star_gooseberry: "⭐", tamarind: "🌿", teak: "🌳",
+      yellowflame: "🌻"
+    };
+
+    let model;
 
     async function handleImageUpload() {
       const fileInput = document.getElementById('uploadInput');
@@ -45,6 +66,17 @@
             .div(255.0)
             .expandDims(0);
 
+          if (!model) {
+            try {
+              model = await tf.loadLayersModel("./model/model.json");
+              console.log("Model loaded successfully");
+            } catch (e) {
+              console.error("Error loading model:", e);
+              alert("Error loading AI model. Please refresh the page.");
+              return;
+            }
+          }
+
           const prediction = await model.predict(imgTensor).data();
           imgTensor.dispose();
 
@@ -65,6 +97,14 @@
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
+    }
+
+    function displayRecognitionResult(className, confidence) {
+      const emoji = plantEmojis[className] || '🌿';
+      const formattedName = className.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const confidencePercent = Math.round(confidence * 100);
+
+      alert(`${emoji} ${formattedName}\nConfidence: ${confidencePercent}%`);
     }
   </script>
 </body>
